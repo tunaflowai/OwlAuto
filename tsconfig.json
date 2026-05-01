@@ -33,6 +33,7 @@
       "@personas/*": ["personas/*"],
       "@skills/*": ["skills/*"],
       "@sandbox/*": ["sandbox/*"],
+      "@server/*": ["server/*"],
       "@utils/*": ["utils/*"]
     }
   },
