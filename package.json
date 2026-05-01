@@ -1,9 +1,15 @@
 {
   "name": "owlauto",
   "version": "0.1.0",
-  "description": "OwlAuto — Enterprise-grade autonomous AI agent framework.",
+  "description": "Enterprise-grade autonomous AI agent framework for Node.js + TypeScript. LLM-agnostic, channel-agnostic, observable.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/server/main.js",
@@ -11,10 +17,36 @@
     "demo": "ts-node src/index.ts",
     "dev": "ts-node src/server/main.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "eslint \"src/**/*.ts\""
+    "lint": "eslint \"src/**/*.ts\"",
+    "prepublishOnly": "npm run typecheck && npm run build"
   },
-  "keywords": ["ai", "agent", "llm", "framework", "autonomous", "owlauto"],
+  "keywords": [
+    "ai",
+    "agent",
+    "agents",
+    "autonomous",
+    "llm",
+    "anthropic",
+    "claude",
+    "gemini",
+    "framework",
+    "typescript",
+    "owlauto",
+    "orchestration",
+    "tool-use",
+    "personas",
+    "observability"
+  ],
+  "author": "TunaflowAI <hello@tunaflow.ai>",
   "license": "MIT",
+  "homepage": "https://github.com/tunaflowai/owlauto#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/tunaflowai/owlauto.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tunaflowai/owlauto/issues"
+  },
   "engines": {
     "node": ">=18.0.0"
   },
