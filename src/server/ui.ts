@@ -331,6 +331,29 @@ $('#btn-stop-all').addEventListener('click', async () => {
   toast('All observers stopped'); refreshObservers();
 });
 
+$('#form-sandbox').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const language = $('#sb-lang').value;
+  const code     = $('#sb-code').value;
+  try {
+    const r = await api('/api/sandbox', { method:'POST', body: JSON.stringify({ language, code }) });
+    $('#sb-output').textContent =
+      'exit=' + r.exitCode + ' (' + r.durationMs + 'ms)\\n' +
+      (r.stdout ? 'stdout:\\n' + r.stdout : '') +
+      (r.stderr ? '\\nstderr:\\n' + r.stderr : '');
+    toast('Sandbox executed (exit ' + r.exitCode + ')');
+  } catch(err){ toast(err.message, false); }
+});
+
+$('#form-state').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const id = $('#state-session').value.trim();
+  try {
+    const r = await api('/api/state/' + encodeURIComponent(id));
+    $('#state-output').textContent = JSON.stringify(r.snapshot, null, 2) || '(empty)';
+  } catch(err){ toast(err.message, false); }
+});
+
 // Live polling
 refreshAll();
 setInterval(refreshLogs, 1500);
@@ -490,6 +513,57 @@ export function renderDashboardHTML(): string {
             </div>
             <div class="col-12 d-grid">
               <button class="btn btn-owl">Dispatch</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sandbox + State -->
+  <div class="row g-3 mt-1">
+    <div class="col-lg-6">
+      <div class="card card-owl">
+        <div class="card-header">Secure Sandbox</div>
+        <div class="card-body">
+          <form id="form-sandbox" class="row g-2">
+            <div class="col-12">
+              <label class="form-label muted small">LANGUAGE</label>
+              <select id="sb-lang" class="form-select form-select-owl">
+                <option value="javascript">javascript</option>
+                <option value="python">python</option>
+                <option value="shell">shell</option>
+              </select>
+            </div>
+            <div class="col-12">
+              <label class="form-label muted small">CODE</label>
+              <textarea id="sb-code" class="form-control form-control-owl" rows="3">console.log('hello from sandbox');</textarea>
+            </div>
+            <div class="col-12 d-grid">
+              <button class="btn btn-owl">Execute in Sandbox</button>
+            </div>
+            <div class="col-12">
+              <pre id="sb-output" class="log-stream" style="height:120px"></pre>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card card-owl">
+        <div class="card-header">Inspect Session State</div>
+        <div class="card-body">
+          <form id="form-state" class="row g-2">
+            <div class="col-12">
+              <label class="form-label muted small">SESSION ID</label>
+              <input id="state-session" class="form-control form-control-owl" value="session:dashboard" required>
+            </div>
+            <div class="col-12 d-grid">
+              <button class="btn btn-owl-ghost">Snapshot</button>
+            </div>
+            <div class="col-12">
+              <pre id="state-output" class="log-stream" style="height:170px"></pre>
             </div>
           </form>
         </div>

@@ -34,6 +34,7 @@ import { AgentTask } from '../core/types';
 
 import { OwlAutoServer } from './OwlAutoServer';
 import { Logger } from '../utils/logger';
+import { SandboxRunner } from '../sandbox/SandboxRunner';
 
 async function bootstrap(): Promise<void> {
   const log = new Logger('Server.Bootstrap');
@@ -95,9 +96,12 @@ async function bootstrap(): Promise<void> {
     intent: 'periodic_health_check',
   }));
 
+  // Sandbox
+  const sandbox = new SandboxRunner();
+
   // Server
   const server = new OwlAutoServer({
-    runtime, channels, personas, skills, observers,
+    runtime, channels, personas, skills, observers, sandbox,
     port: Number(process.env.PORT ?? 3000),
   });
   await server.listen();

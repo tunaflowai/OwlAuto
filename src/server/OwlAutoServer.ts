@@ -12,6 +12,7 @@ import { Logger } from '../utils/logger';
 import { OWL_FAVICON_SVG, OWL_LOGO_SVG } from './assets';
 import { renderDashboardHTML } from './ui';
 import { randomUUID } from 'crypto';
+import { SandboxRunner, SandboxLanguage } from '../sandbox/SandboxRunner';
 
 export interface OwlAutoServerDeps {
   readonly runtime: AgentRuntime;
@@ -19,6 +20,7 @@ export interface OwlAutoServerDeps {
   readonly personas: PersonaRegistry;
   readonly skills: SkillRegistry;
   readonly observers: ObserverManager;
+  readonly sandbox: SandboxRunner;
   readonly port?: number;
 }
 
@@ -76,6 +78,14 @@ export class OwlAutoServer {
         return this.json(res, Logger.recent(limit));
       }
 
+      // State inspection
+      const stateMatch = url.pathname.match(/^\/api\/state\/(.+)$/);
+      if (req.method === 'GET' && stateMatch) {
+        const sessionId = decodeURIComponent(stateMatch[1]);
+        const snapshot = await this.deps.runtime.stateEngine.snapshot(sessionId);
+        return this.json(res, { sessionId, snapshot });
+      }
+
       // API — write
       if (req.method === 'POST') {
         const body = await this.readJson(req);
@@ -115,6 +125,17 @@ export class OwlAutoServer {
           const id = decodeURIComponent(send[1]);
           await this.deps.runtime.dispatch(id, String(body.recipient ?? ''), String(body.message ?? ''));
           return this.json(res, { ok: true });
+        }
+
+        // Sandbox execution
+        if (url.pathname === '/api/sandbox') {
+          const result = await this.deps.sandbox.run({
+            language: (body.language as SandboxLanguage) ?? SandboxLanguage.JAVASCRIPT,
+            code: String(body.code ?? ''),
+            timeoutMs: body.timeoutMs ? Number(body.timeoutMs) : undefined,
+            allowedHosts: Array.isArray(body.allowedHosts) ? body.allowedHosts as string[] : [],
+          });
+          return this.json(res, result);
         }
       }
 
